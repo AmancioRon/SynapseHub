@@ -15,6 +15,7 @@ import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
+import AIAssistant from './components/AIAssistant';
 
 function AppRoutes() {
   const { user } = useStore();
@@ -38,18 +39,21 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Layout title="Dashboard"><Dashboard /></Layout>} />
-      <Route path="/customers" element={<Layout title="Customers"><Customers /></Layout>} />
-      <Route path="/activities" element={<Layout title="Activities"><Activities /></Layout>} />
-      <Route path="/expenses" element={<Layout title="Expenses"><Expenses /></Layout>} />
-      <Route path="/appointments" element={<Layout title="Appointments"><Appointments /></Layout>} />
-      <Route path="/health" element={<Layout title="Health Tracker"><HealthTracker /></Layout>} />
-      <Route path="/notifications" element={<Layout title="Notifications"><Notifications /></Layout>} />
-      <Route path="/settings" element={<Layout title="Settings"><Settings /></Layout>} />
-      
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Layout title="Dashboard"><Dashboard /></Layout>} />
+        <Route path="/customers" element={<Layout title="Customers"><Customers /></Layout>} />
+        <Route path="/activities" element={<Layout title="Activities"><Activities /></Layout>} />
+        <Route path="/expenses" element={<Layout title="Expenses"><Expenses /></Layout>} />
+        <Route path="/appointments" element={<Layout title="Appointments"><Appointments /></Layout>} />
+        <Route path="/health" element={<Layout title="Health Tracker"><HealthTracker /></Layout>} />
+        <Route path="/notifications" element={<Layout title="Notifications"><Notifications /></Layout>} />
+        <Route path="/settings" element={<Layout title="Settings"><Settings /></Layout>} />
+        
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <AIAssistant />
+    </>
   );
 }
 

@@ -5,7 +5,7 @@ import { useStore } from '../context/StoreContext';
 import { 
   Moon, Sun, Monitor, Bell, Shield, User as UserIcon, LogOut, 
   ChevronRight, Smartphone, Lock, LayoutGrid, Heart, Dumbbell, 
-  X, Save, Trash2, Download, Upload, RotateCcw
+  X, Save, Trash2, Download, Upload, RotateCcw, Bot, Sparkles, MessageSquare
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,12 +13,20 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
-  const { user, logout, updateModuleSettings, updateHealthProfile, updateUser } = useStore();
+  const { user, logout, updateModuleSettings, updateHealthProfile, updateUser, updateAssistantSettings, clearChatHistory } = useStore();
   const navigate = useNavigate();
   
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [editForm, setEditForm] = useState({ name: user?.name || '', email: user?.email || '' });
+  const [editForm, setEditForm] = useState({ name: user?.name || '', email: user?.email || '', avatarUrl: user?.avatarUrl || '' });
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatarUrl || null);
+
+  const defaultAvatars = [
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`,
+    `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.name || 'User'}`,
+    `https://api.dicebear.com/7.x/micah/svg?seed=${user?.name || 'User'}`,
+    `https://api.dicebear.com/7.x/notionists/svg?seed=${user?.name || 'User'}`,
+  ];
 
   const themeOptions = [
     { id: 'light', label: 'Light', icon: Sun },
@@ -44,8 +52,23 @@ export default function Settings() {
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    updateUser(editForm);
+    updateUser({ ...editForm, avatarUrl: avatarPreview || undefined });
     setIsEditingProfile(false);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size must be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const resetApp = () => {
@@ -68,12 +91,15 @@ export default function Settings() {
       <section className="flex flex-col items-center text-center space-y-3 py-4">
         <div className="w-24 h-24 rounded-full bg-indigo-600 p-1 relative group">
           <img 
-            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`} 
+            src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`} 
             alt="Profile" 
             className="w-full h-full rounded-full border-4 border-white dark:border-slate-950 object-cover bg-slate-100"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+          <div 
+            className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+            onClick={() => setIsEditingProfile(true)}
+          >
             <Smartphone className="w-6 h-6 text-white" />
           </div>
         </div>
@@ -147,6 +173,47 @@ export default function Settings() {
         </Card>
       </section>
 
+      {/* Assistant Settings */}
+      <section className="space-y-3">
+        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1">AI Assistant</h4>
+        <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <Bot className="w-5 h-5 text-indigo-500" />
+              <span className="text-sm font-bold">Enable Assistant</span>
+            </div>
+            <button 
+              onClick={() => updateAssistantSettings({ enabled: !user?.assistantSettings?.enabled })}
+              className={cn("w-12 h-6 rounded-full transition-colors relative", user?.assistantSettings?.enabled !== false ? "bg-indigo-600" : "bg-slate-200 dark:bg-slate-700")}
+            >
+              <div className={cn("w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform", user?.assistantSettings?.enabled !== false ? "translate-x-6" : "translate-x-0.5")} />
+            </button>
+          </div>
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-slate-400" />
+              <span className="text-sm font-bold">Show Floating Widget</span>
+            </div>
+            <button 
+              onClick={() => updateAssistantSettings({ showWidget: !user?.assistantSettings?.showWidget })}
+              className={cn("w-12 h-6 rounded-full transition-colors relative", user?.assistantSettings?.showWidget !== false ? "bg-indigo-600" : "bg-slate-200 dark:bg-slate-700")}
+            >
+              <div className={cn("w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform", user?.assistantSettings?.showWidget !== false ? "translate-x-6" : "translate-x-0.5")} />
+            </button>
+          </div>
+          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" onClick={() => {
+            if (window.confirm('Are you sure you want to clear your chat history with the assistant?')) {
+              clearChatHistory();
+            }
+          }}>
+            <div className="flex items-center gap-3">
+              <MessageSquare className="w-5 h-5 text-rose-500" />
+              <span className="text-sm font-bold text-rose-500">Clear Chat History</span>
+            </div>
+          </div>
+        </Card>
+      </section>
+
       {/* Preferences & Security */}
       <section className="space-y-4">
         <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1">Security & Data</h4>
@@ -174,12 +241,67 @@ export default function Settings() {
         onClose={() => setIsEditingProfile(false)}
         title="Edit Profile"
         footer={
-          <Button onClick={handleProfileUpdate} className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-            <Save className="w-5 h-5" /> Save Changes
-          </Button>
+          <div className="flex gap-3 w-full">
+            <Button variant="secondary" onClick={() => setIsEditingProfile(false)} className="flex-1 py-4 rounded-2xl font-bold">
+              Cancel
+            </Button>
+            <Button onClick={handleProfileUpdate} className="flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
+              <Save className="w-5 h-5" /> Save
+            </Button>
+          </div>
         }
       >
         <form onSubmit={handleProfileUpdate} className="space-y-6">
+          {/* Avatar Selection */}
+          <div className="space-y-4">
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">Profile Picture</label>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-24 h-24 rounded-full bg-indigo-600 p-1 relative">
+                <img 
+                  src={avatarPreview || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`} 
+                  alt="Profile Preview" 
+                  className="w-full h-full rounded-full border-4 border-white dark:border-slate-950 object-cover bg-slate-100"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              
+              <div className="flex gap-2 w-full">
+                <label className="flex-1">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                  <div className="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-center cursor-pointer transition-colors flex items-center justify-center gap-2">
+                    <Upload className="w-4 h-4" /> Upload
+                  </div>
+                </label>
+                <button 
+                  type="button"
+                  onClick={() => setAvatarPreview(null)}
+                  className="flex-1 py-3 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" /> Remove
+                </button>
+              </div>
+
+              <div className="w-full space-y-2">
+                <p className="text-xs font-medium text-slate-500">Or choose a default avatar:</p>
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {defaultAvatars.map((avatar, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setAvatarPreview(avatar)}
+                      className={cn(
+                        "w-12 h-12 rounded-full flex-shrink-0 border-2 transition-all p-0.5 bg-slate-100",
+                        avatarPreview === avatar ? "border-indigo-600 scale-110" : "border-transparent hover:border-slate-300"
+                      )}
+                    >
+                      <img src={avatar} alt={`Avatar ${idx}`} className="w-full h-full rounded-full" referrerPolicy="no-referrer" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
             <input 

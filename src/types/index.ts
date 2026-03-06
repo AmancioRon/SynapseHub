@@ -75,14 +75,30 @@ export interface HealthProfile {
   hasCompletedSetup: boolean;
 }
 
+export interface AssistantSettings {
+  enabled: boolean;
+  showWidget: boolean;
+  suggestionsEnabled: boolean;
+  tone: 'assistant' | 'friendly' | 'professional';
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+}
+
 export interface User {
   id: string;
   email: string;
   name: string;
+  avatarUrl?: string;
   isAuthenticated: boolean;
   hasCompletedOnboarding: boolean;
   enabledModules: string[];
   healthProfile?: HealthProfile;
+  assistantSettings?: AssistantSettings;
 }
 
 export interface Notification {

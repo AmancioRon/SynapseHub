@@ -43,9 +43,10 @@ export default function Dashboard() {
           </div>
           <div className="w-14 h-14 rounded-2xl bg-white/10 p-0.5 backdrop-blur-md border border-white/20 shadow-xl overflow-hidden">
             <img 
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`} 
+              src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'User'}`} 
               alt="Profile" 
-              className="w-full h-full object-cover rounded-[14px]"
+              className="w-full h-full object-cover rounded-[14px] bg-slate-100"
+              referrerPolicy="no-referrer"
             />
           </div>
         </div>
