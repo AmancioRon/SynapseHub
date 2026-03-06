@@ -1,0 +1,9 @@
+{
+  "name": "SynapseHub",
+  "description": "Your Personal Operations Hub for managing customers, activities, expenses, appointments, and health.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
